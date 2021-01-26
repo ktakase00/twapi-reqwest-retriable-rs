@@ -1,3 +1,4 @@
+mod apis;
 pub mod error;
 
 use crate::error::RetriableError;
@@ -13,7 +14,7 @@ const STATUS_CODE_INTERNAL_SERVER_ERROR: u16 = 500;
 const STATUS_CODE_SERVICE_UNAVAILABLE: u16 = 503;
 const STATUS_CODE_GATEWAY_TIMEOUT: u16 = 504;
 
-static RETRIABLE_ERRORS: Lazy<Vec<u16>> = Lazy::new(|| {
+pub static RETRIABLE_ERRORS: Lazy<Vec<u16>> = Lazy::new(|| {
     vec![
         STATUS_CODE_INTERNAL_SERVER_ERROR,
         STATUS_CODE_SERVICE_UNAVAILABLE,
@@ -82,64 +83,6 @@ where
             access_secret: access_secret.to_owned(),
             log: log,
         }
-    }
-
-    pub async fn search(
-        &self,
-        params: &Vec<(&str, &str)>,
-        retry_count: usize,
-        retry_delay_secound_count: usize,
-    ) -> Result<Value, RetriableError> {
-        let path = "https://api.twitter.com/1.1/search/tweets.json";
-        let log_params = LogParams::new(path, params);
-        Ok(self
-            .execute(
-                retry_count,
-                Some(retry_delay_secound_count),
-                log_params,
-                &RETRIABLE_ERRORS,
-                || {
-                    twapi_reqwest::v1::get(
-                        &path,
-                        &params,
-                        &self.consumer_key,
-                        &self.consumer_secret,
-                        &self.access_key,
-                        &self.access_secret,
-                    )
-                },
-            )
-            .await?
-            .result)
-    }
-
-    pub async fn user_timeline(
-        &self,
-        params: &Vec<(&str, &str)>,
-        retry_count: usize,
-        retry_delay_secound_count: usize,
-    ) -> Result<Value, RetriableError> {
-        let path = "https://api.twitter.com/1.1/search/user_timeline.json";
-        let log_params = LogParams::new(path, params);
-        Ok(self
-            .execute(
-                retry_count,
-                Some(retry_delay_secound_count),
-                log_params,
-                &RETRIABLE_ERRORS,
-                || {
-                    twapi_reqwest::v1::get(
-                        &path,
-                        &params,
-                        &self.consumer_key,
-                        &self.consumer_secret,
-                        &self.access_key,
-                        &self.access_secret,
-                    )
-                },
-            )
-            .await?
-            .result)
     }
 
     async fn execute<Executor, ResponseFutuer>(
@@ -238,12 +181,4 @@ fn get_header_value(response: &Response, key: &str) -> u64 {
 
 async fn sleep(seconds: u64) {
     delay_for(Duration::from_secs(seconds)).await;
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
 }
