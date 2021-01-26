@@ -52,36 +52,25 @@ pub struct RetriableResult {
     pub reset: u64,
 }
 
-pub struct Retriable<U, F>
-where
-    U: Future<Output = ()>,
-    F: Fn(LogParams) -> U,
-{
+pub struct Retriable {
     consumer_key: String,
     consumer_secret: String,
     access_key: String,
     access_secret: String,
-    log: F,
 }
 
-impl<U, F> Retriable<U, F>
-where
-    U: Future<Output = ()>,
-    F: Fn(LogParams) -> U,
-{
+impl Retriable {
     pub fn new(
         consumer_key: &str,
         consumer_secret: &str,
         access_key: &str,
         access_secret: &str,
-        log: F,
     ) -> Self {
         Self {
             consumer_key: consumer_key.to_owned(),
             consumer_secret: consumer_secret.to_owned(),
             access_key: access_key.to_owned(),
             access_secret: access_secret.to_owned(),
-            log: log,
         }
     }
 
@@ -91,6 +80,7 @@ where
         retry_delay_secound_count: Option<usize>,
         log_params: LogParams,
         retryable_status_codes: &Vec<u16>,
+        log: &impl Fn(LogParams),
         executor: Executor,
     ) -> Result<RetriableResult, RetriableError>
     where
@@ -104,7 +94,7 @@ where
         let mut err: RetriableError;
 
         loop {
-            (self.log)(log_params.clone()).await;
+            (log)(log_params.clone());
 
             let response = executor().await?;
 
@@ -126,7 +116,7 @@ where
                 Ok(json) => {
                     let mut log_params2 = log_params.clone();
                     log_params2.result = Some(json.clone());
-                    (self.log)(log_params2);
+                    (log)(log_params2);
 
                     // エラー判定。status_codeはとりあえず放置
                     if json["errors"].is_array() || json["error"].is_string() {

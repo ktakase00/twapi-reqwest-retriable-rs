@@ -1,22 +1,13 @@
-use crate::{
-    error::RetriableError,
-    Retriable,
-    LogParams,
-    RETRIABLE_ERRORS,
-};
+use crate::{error::RetriableError, LogParams, Retriable, RETRIABLE_ERRORS};
 use twapi_reqwest::serde_json::Value;
-use std::future::Future;
 
-impl<U, F> Retriable<U, F>
-where
-    U: Future<Output = ()>,
-    F: Fn(LogParams) -> U,
-{
+impl Retriable {
     pub async fn search(
         &self,
         params: &Vec<(&str, &str)>,
         retry_count: usize,
         retry_delay_secound_count: usize,
+        log: &impl Fn(LogParams),
     ) -> Result<Value, RetriableError> {
         let path = "https://api.twitter.com/1.1/search/tweets.json";
         let log_params = LogParams::new(path, params);
@@ -26,6 +17,7 @@ where
                 Some(retry_delay_secound_count),
                 log_params,
                 &RETRIABLE_ERRORS,
+                log,
                 || {
                     twapi_reqwest::v1::get(
                         &path,

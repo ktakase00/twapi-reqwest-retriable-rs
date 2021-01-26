@@ -11,6 +11,6 @@ pub mod search;
 pub mod statuses_lookup;
 pub mod statuses_show;
 pub mod statuses_update;
-pub mod users_show;
 pub mod user_timeline;
 pub mod users_lookup;
+pub mod users_show;
