@@ -9,7 +9,7 @@ impl Retriable {
         retry_delay_secound_count: usize,
         log: &impl Fn(LogParams),
     ) -> Result<Value, RetriableError> {
-        let path = "https://api.twitter.com/1.1/search/user_timeline.json";
+        let path = "https://api.twitter.com/1.1/statuses/user_timeline.json";
         let log_params = LogParams::new(path, params);
         Ok(self
             .execute(
