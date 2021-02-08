@@ -8,6 +8,9 @@ pub enum RetriableError {
     #[error("Twitter Response failed: {0}, {1}")]
     TwitterResponse(String, u16),
 
+    #[error("Twitter Media failed: {0}")]
+    TwitterMedia(twapi_reqwest::serde_json::Value),
+
     #[error(transparent)]
     IO(#[from] std::io::Error),
 
