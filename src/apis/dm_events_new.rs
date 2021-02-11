@@ -8,7 +8,7 @@ impl Retriable {
         retry_count: usize,
         log: &impl Fn(LogParams),
     ) -> Result<Value, RetriableError> {
-        let path = "https://api.twitter.com/1.1/users/show.json";
+        let path = "https://api.twitter.com/1.1/direct_messages/events/new.json";
         let log_params = LogParams::new(path, &vec![]);
         let p1 = vec![];
         Ok(self
