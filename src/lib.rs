@@ -4,7 +4,6 @@ pub mod error;
 use crate::error::RetriableError;
 use once_cell::sync::Lazy;
 use std::{future::Future, time::Duration};
-use tokio::time::delay_for;
 use twapi_reqwest::reqwest::Response;
 use twapi_reqwest::serde_json::Value;
 
@@ -170,5 +169,5 @@ fn get_header_value(response: &Response, key: &str) -> u64 {
 }
 
 async fn sleep(seconds: u64) {
-    delay_for(Duration::from_secs(seconds)).await;
+    tokio::time::sleep(Duration::from_secs(seconds)).await;
 }
