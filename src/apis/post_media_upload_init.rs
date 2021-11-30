@@ -1,5 +1,5 @@
 use crate::{error::RetriableError, LogParams, Retriable};
-use twapi_reqwest::{reqwest::multipart::Form, serde_json::Value};
+use twapi_reqwest::serde_json::Value;
 
 impl Retriable {
     pub async fn post_media_upload_init(
@@ -11,31 +11,16 @@ impl Retriable {
         retry_count: usize,
         log: &impl Fn(LogParams),
     ) -> Result<Value, RetriableError> {
-        let path = "https://upload.twitter.com/1.1/media/upload.json";
-
-        let log_params = LogParams::new(&path, &vec![]);
-        let p1 = vec![];
         Ok(self
-            .execute(retry_count, None, log_params, &vec![], log, || {
-                let mut form = Form::new()
-                    .text("command", "INIT")
-                    .text("total_bytes", file_size.to_string())
-                    .text("media_type", String::from(media_type))
-                    .text("media_category", String::from(media_category));
-                if let Some(additional_owners) = &additional_owners {
-                    form = form.text("additional_owners", additional_owners.clone());
-                }
-                twapi_reqwest::v1::multipart(
-                    &path,
-                    &p1,
-                    form,
-                    &self.consumer_key,
-                    &self.consumer_secret,
-                    &self.access_key,
-                    &self.access_secret,
-                )
-            })
-            .await?
-            .result)
+            .post_media_upload_init_dm(
+                file_size.clone(),
+                media_type,
+                media_category,
+                additional_owners.map(|it| it.to_owned()),
+                None,
+                retry_count.clone(),
+                log,
+            )
+            .await?)
     }
 }
