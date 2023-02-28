@@ -24,6 +24,7 @@ impl Retriable {
                     &self.consumer_secret,
                     &self.access_key,
                     &self.access_secret,
+                    self.timeout_sec,
                 )
             },
         )
