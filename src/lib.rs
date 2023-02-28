@@ -57,6 +57,7 @@ pub struct Retriable {
     consumer_secret: String,
     access_key: String,
     access_secret: String,
+    timeout_sec: Option<Duration>,
 }
 
 impl Retriable {
@@ -65,12 +66,15 @@ impl Retriable {
         consumer_secret: &str,
         access_key: &str,
         access_secret: &str,
+        timeout_sec: Option<Duration>,
+
     ) -> Self {
         Self {
             consumer_key: consumer_key.to_owned(),
             consumer_secret: consumer_secret.to_owned(),
             access_key: access_key.to_owned(),
             access_secret: access_secret.to_owned(),
+            timeout_sec,
         }
     }
 
