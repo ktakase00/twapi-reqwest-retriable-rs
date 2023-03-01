@@ -4,7 +4,7 @@ pub mod error;
 use crate::error::RetriableError;
 use once_cell::sync::Lazy;
 use std::{future::Future, time::Duration};
-use tokio::time::delay_for;
+use tokio::time::sleep;
 use twapi_reqwest::reqwest::Response;
 use twapi_reqwest::serde_json::Value;
 
@@ -157,10 +157,10 @@ impl Retriable {
             // スリープ
             match retry_delay_secound_count {
                 // 固定値でスリープ
-                Some(retry_delay_secound_count) => sleep(retry_delay_secound_count as u64).await,
+                Some(retry_delay_secound_count) => sleep_sec(retry_delay_secound_count as u64).await,
 
                 // リトライ間隔を開けてスリープ
-                None => sleep(2_i64.pow(count as u32) as u64).await,
+                None => sleep_sec(2_i64.pow(count as u32) as u64).await,
             }
         }
     }
@@ -173,6 +173,6 @@ fn get_header_value(response: &Response, key: &str) -> u64 {
     }
 }
 
-async fn sleep(seconds: u64) {
-    delay_for(Duration::from_secs(seconds)).await;
+async fn sleep_sec(seconds: u64) {
+    sleep(Duration::from_secs(seconds)).await;
 }
